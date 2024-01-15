@@ -1,6 +1,8 @@
 from django.db import models
 from django.urls import reverse
 import uuid
+from django.conf import settings
+from datetime import date
 
 # Create your models here.
 class Genre(models.Model):
@@ -40,6 +42,7 @@ class BookInstance(models.Model):
     book = models.ForeignKey("Book", on_delete=models.RESTRICT, null=True)
     imprint = models.CharField(max_length=200)
     due_back = models.DateField(null=True, blank=True)
+    borrower = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True)
 
     LOAN_STATUS = (
         ("m","Maintanance"),
@@ -50,8 +53,16 @@ class BookInstance(models.Model):
 
     status = models.CharField(max_length=1, choices=LOAN_STATUS, blank=True, default="m", help_text="Book availability",)
 
+    @property
+    def is_overdue(self):
+        return bool(self.due_back and date.today() > self.due_back)
+
     class Meta:
         ordering = ["due_back"]
+        permissions = (("can_mark_returned", "Set book as returned"),)
+
+    def get_absolute_url(self):
+        return reverse('bookinstance-detail', args=[str(self.id)])
 
     def __str__(self):
         return f'{self.id} ({self.book.title})'
@@ -73,6 +84,9 @@ class Author(models.Model):
     
 class Language(models.Model):
     lang = models.CharField(max_length=200, unique=True, help_text="Enter the book's natural language such as French, Spanish etc.")
+
+    def get_absolute_url(self):
+        return reverse('language-detail', args=[str(self.id)])
 
     def __str__(self):
         return self.lang
