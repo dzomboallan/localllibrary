@@ -1,1 +1,1 @@
-A website that might be used to manage the catalog for a local library.
+A website designed for the management of a local library's catalog.
