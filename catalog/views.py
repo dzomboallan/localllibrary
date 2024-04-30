@@ -1,11 +1,9 @@
 import datetime
 
-from typing import Any
-from django.db.models.query import QuerySet
 from django.shortcuts import render, get_object_or_404
 from .models import Book, Author, BookInstance, Genre, Language
 from django.views import generic
-from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required, permission_required
 from django.http import HttpResponseRedirect
 from django.urls import reverse, reverse_lazy
@@ -14,11 +12,10 @@ from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from catalog.forms import RenewBookForm
 
 
-
 # Create your views here.
 def index(request):
     num_books = Book.objects.all().count()
-    num_instances =BookInstance.objects.all().count()
+    num_instances = BookInstance.objects.all().count()
     num_instances_available = BookInstance.objects.filter(status__exact= 'a').count()
     num_authors = Author.objects.count()
     num_genre = Genre.objects.all().count()
