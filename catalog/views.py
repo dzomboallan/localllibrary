@@ -1,9 +1,11 @@
 import datetime
 
+from typing import Any
+from django.db.models.query import QuerySet
 from django.shortcuts import render, get_object_or_404
 from .models import Book, Author, BookInstance, Genre, Language
 from django.views import generic
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.contrib.auth.decorators import login_required, permission_required
 from django.http import HttpResponseRedirect
 from django.urls import reverse, reverse_lazy
@@ -35,18 +37,23 @@ def index(request):
 
     return render(request, 'index.html', context=context)
 
+
 class BookListView(generic.ListView):
     model = Book
     paginate_by = 10
+#
 
 class BookDetailView(generic.DetailView):
     model =Book
 
+
 class AuthorListView(generic.ListView):
     model = Author
 
+
 class AuthorDetailView(generic.DetailView):
     model = Author
+
 
 class LoanedBooksByUserListView(LoginRequiredMixin, generic.ListView):
     model = BookInstance
@@ -59,7 +66,8 @@ class LoanedBooksByUserListView(LoginRequiredMixin, generic.ListView):
             .filter(status__exact='o')
             .order_by('due_back')
         )
-    
+
+
 class LoanedBooksAllListView(PermissionRequiredMixin, generic.ListView):
     model = BookInstance
     permission_required = 'catalog.can_mark_returned'
@@ -94,6 +102,7 @@ def renew_book_librarian(request, pk):
 
     return render(request, 'catalog/book_renew_librarian.html', context)
 
+
 class AuthorCreate(PermissionRequiredMixin, CreateView):
     model = Author
     fields = ['first_name', 'last_name', 'date_of_birth', 'date_of_death']
@@ -105,7 +114,8 @@ class AuthorUpdate(PermissionRequiredMixin, UpdateView):
     model = Author
     fields = '__all__'
     permission_required = 'catalog.change_author'
-    
+
+
 class AuthorDelete(PermissionRequiredMixin, DeleteView):
     model = Author
     success_url = reverse_lazy('authors')
@@ -119,16 +129,19 @@ class AuthorDelete(PermissionRequiredMixin, DeleteView):
             return HttpResponseRedirect(
                 reverse("author-delete", kwargs={"pk": self.object.pk})
             )                                                           
-        
+
+
 class BookCreate(PermissionRequiredMixin, CreateView):
     model = Book
     fields = '__all__'
     permission_required = 'catalog.add_book'
 
+
 class BookUpdate(PermissionRequiredMixin, UpdateView):
     model = Book
     fields = '__all__'
     permission_required = 'catalog.change_book'
+ 
     
 class BookDelete(PermissionRequiredMixin, DeleteView):
     model = Book
